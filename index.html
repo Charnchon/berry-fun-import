@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Near Word Imposter</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        text-align: center;
+        background: #f4f4f4;
+        padding: 30px;
+      }
+      .card {
+        max-width: 600px;
+        margin: auto;
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      }
+      button {
+        padding: 12px 20px;
+        margin: 10px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        background: #6f42c1;
+        color: white;
+      }
+      #word {
+        font-size: 30px;
+        margin: 20px;
+        font-weight: bold;
+      }
+      textarea,
+      input {
+        width: 80%;
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>🎭 Near Word Imposter</h1>
+
+      <label>จำนวนผู้เล่น</label><br />
+      <input type="number" id="players" value="5" /><br /><br />
+
+      <label>จำนวน Imposter</label><br />
+      <input type="number" id="imposters" value="1" /><br /><br />
+
+      <label>กรอกคู่คำ (รูปแบบ: คำหลัก-คำใกล้เคียง)</label><br />
+      <textarea id="pairs" rows="8">
+หมอน-ผ้าห่ม
+กาแฟ-ชา
+แมว-หมา
+โรงเรียน-มหาลัย
+รถยนต์-มอเตอร์ไซค์
+พิซซ่า-เบอร์เกอร์
+</textarea
+      ><br />
+
+      <button onclick="startGame()">เริ่มเกม</button>
+      <button onclick="restartGame()">เริ่มรอบใหม่</button>
+
+      <div id="game" style="display: none">
+        <h2 id="playerTurn"></h2>
+        <button onclick="showWord()">เปิดดูคำ</button>
+        <div id="word"></div>
+        <button onclick="nextPlayer()">คนถัดไป</button>
+      </div>
+    </div>
+
+    <script>
+      let playerWords = [];
+      let currentPlayer = 0;
+
+      function getPairs() {
+        return document
+          .getElementById("pairs")
+          .value.split("\n")
+          .map((line) => line.trim())
+          .filter((line) => line.includes("-"))
+          .map((line) => line.split("-"));
+      }
+
+      function startGame() {
+        const players = parseInt(document.getElementById("players").value);
+        const imposters = parseInt(document.getElementById("imposters").value);
+        const pairs = getPairs();
+
+        if (pairs.length === 0) {
+          alert("กรุณากรอกคู่คำ");
+          return;
+        }
+
+        const pair = pairs[Math.floor(Math.random() * pairs.length)];
+        const normalWord = pair[0].trim();
+        const imposterWord = pair[1].trim();
+
+        playerWords = Array(players).fill(normalWord);
+
+        let chosen = [];
+        while (chosen.length < imposters) {
+          let rand = Math.floor(Math.random() * players);
+          if (!chosen.includes(rand)) {
+            chosen.push(rand);
+            playerWords[rand] = imposterWord;
+          }
+        }
+
+        currentPlayer = 0;
+        document.getElementById("game").style.display = "block";
+        updateTurn();
+      }
+
+      function updateTurn() {
+        document.getElementById("playerTurn").innerText =
+          `ผู้เล่นคนที่ ${currentPlayer + 1}`;
+        document.getElementById("word").innerText = "";
+      }
+
+      function showWord() {
+        document.getElementById("word").innerText = playerWords[currentPlayer];
+      }
+
+      function nextPlayer() {
+        currentPlayer++;
+
+        if (currentPlayer >= playerWords.length) {
+          alert("แจกคำครบแล้ว เริ่มถกกันได้!");
+          document.getElementById("game").style.display = "none";
+        } else {
+          updateTurn();
+        }
+      }
+
+      function restartGame() {
+        document.getElementById("game").style.display = "none";
+        document.getElementById("word").innerText = "";
+      }
+    </script>
+  </body>
+</html>
